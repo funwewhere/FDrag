@@ -135,7 +135,6 @@
         this.move = {
             nowX : 0,
             nowY : 0,
-            velocity : 0,
             lastX : 0,
             lastY : 0,
         }
@@ -150,14 +149,31 @@
         }
 
         this.elastic = {
-            isChange : false,
-            initPosition : 0,
-            acceleration : 0,
+            direction : 'all',
+            angle : 0,
             friction : 1,
+            callback : null,
             k : 0.01,
-            offset : 0,
-            all : 0,
-            callback : null
+            X : {
+                isChange : false,
+                velocity : 0,
+                initDirection : 0,
+                balancePosition :0,
+                isSpringback : false,
+                acceleration : 0,
+                offset : 0,
+                allPower : 0
+            },
+            Y : {
+                isChange : false,
+                velocity : 0,
+                initDirection : 0,
+                balancePosition :0,
+                isSpringback : false,
+                acceleration : 0,
+                offset : 0,
+                allPower : 0
+            }
         }
 
         this.touch = {
@@ -275,69 +291,145 @@
             });
         },
         elasticChange : function(option){
-            this.elastic.isChange = true;
 
-            this.elastic.initPosition = option.initPositiont || this.elastic.initPosition;
-            this.elastic.offset = this.move.nowX - this.elastic.initPosition;
-            this.elastic.all = this.elastic.k * Math.pow(this.elastic.offset, 2);
-            this.elastic.acceleration = - this.elastic.k * this.elastic.offset;
-            this.elastic.callback = null;
-
-            intervalCall({
-                intervalFn : function($this) {
-                    if($this.move.velocity != 0 || $this.elastic.acceleration != 0) {
-
-                        $this.move.velocity += $this.elastic.acceleration;
-                        $this.elastic.offset += $this.move.velocity;
-                        $this.elastic.offset = $this.move.nowX - $this.elastic.initPosition;
-
-                        if($this.elastic.offset < 0) {
-                            $this.elastic.offset =0;
-                            $this.move.nowX = 0;
-                            $this.elastic.all *= $this.elastic.friction;
-                            $this.move.velocity = Math.sqrt($this.elastic.all);
-                        } else {
-                            $this.move.nowX += $this.move.velocity;
-                        }
-
-                        $this.elastic.offset = $this.move.nowX - $this.elastic.initPosition;
-
-                        if ( $this.scaleFn) {
-                            $this.scale.value = $this.scaleFn($this.move.nowX, $this.move.nowY);
-                        }
-
-                        $this.elastic.acceleration = - $this.elastic.k * $this.elastic.offset;
-
-                        if ( Math.abs($this.move.velocity ) < 0.5) {
-                            $this.move.velocity = 0;
-                        }
-                        if ( Math.abs($this.elastic.acceleration ) < 0.5) {
-                            $this.elastic.acceleration = 0;
-                        }
-
-                        return true;
-                    }
-                    $this.elastic.isChange = false;
-                    return false;
-                },
-                param : this,
-                callback : this.elastic.callback
-            });
+            this.elastic.direction = option.direction || this.elastic.direction;
+            this.elastic.friction = option.friction || this.elastic.friction;
+            this.elastic.k = option.k || this.elastic.k;
+            this.elastic.callback = option.callback || this.elastic.callback;
+            
+            if ((this.elastic.direction == 'all' || this.elastic.direction == 'X') && option.X) {
+                
+                this.elastic.X.isSpringback = option.X.isSpringback || this.elastic.X.isSpringback;
+                this.elastic.X.balancePosition = option.X.origin || this.elastic.X.balancePosition;
+                this.elastic.X.offset = this.move.nowX - this.elastic.X.balancePosition;
+                this.elastic.X.allPower = this.elastic.k * Math.pow(this.elastic.X.offset, 2);
+                this.elastic.X.acceleration = - this.elastic.k * this.elastic.X.offset;
+                this.elastic.X.initDirection = this.move.nowX - this.elastic.X.balancePosition > 0;
+                this.elastic.X.isChange = true;
+                
+                intervalCall({
+                    intervalFn : elasticing,
+                    param : {
+                        $this : this,
+                        elasticInfo : this.elastic.X,
+                        direction : 'X'
+                    },
+                    callback : this.elastic.callback
+                });
+            }
+            if ((this.elastic.direction == 'all' || this.elastic.direction == 'Y') && option.Y) {
+                
+                this.elastic.Y.isSpringback = option.Y.isSpringback || this.elastic.Y.isSpringback;
+                this.elastic.Y.balancePosition = option.Y.origin || this.elastic.Y.balancePosition;
+                this.elastic.Y.offset = this.move.nowY - this.elastic.Y.balancePosition;
+                this.elastic.Y.allPower = this.elastic.k * Math.pow(this.elastic.Y.offset, 2);
+                this.elastic.Y.acceleration = - this.elastic.k * this.elastic.Y.offset;
+                this.elastic.Y.initDirection = this.move.nowY - this.elastic.Y.balancePosition > 0;
+                this.elastic.Y.isChange = true;
+                
+                intervalCall({
+                    intervalFn : elasticing,
+                    param : {
+                        $this : this,
+                        elasticInfo : this.elastic.Y,
+                        direction : 'Y'
+                    },
+                    callback : this.elastic.callback
+                });
+            }
         },
         calculateLacation : function() {
             this.move.nowX = this.direction != 'Y' ? velidateBound(this.move.lastX + this.touch.offsetX, this.minX, this.maxX) : 0;
             this.move.nowY = this.direction != 'X' ? velidateBound(this.move.lastY + this.touch.offsetY, this.minY, this.maxY) : 0;
         },
         needUpdate : function() {
-            return this.touch.isActive || this.scale.isChange || this.elastic.isChange;
+            return this.touch.isActive || this.scale.isChange || this.elastic.X.isChange || this.elastic.Y.isChange;
         },
         destroy : function() {
-            List.prototype.destroy.apply( this );
-
             this.element.removeEventListener( 'touchstart', this.touchStartDelegate, false );
             this.element.removeEventListener( 'touchmove', this.touchMoveDelegate, false );
             this.element.removeEventListener( 'touchend', this.touchEndDelegate, false );
         }
+    }
+
+    function elasticing(param) {
+        var $this = param.$this;
+
+        if ($this.touch.isActive) return false;
+
+        var elasticInfo = param.elasticInfo;
+        elasticInfo.velocity += elasticInfo.acceleration;
+
+        var lastXoffset = elasticInfo.offset;
+        elasticInfo.offset += elasticInfo.velocity;
+
+        if ( !elasticInfo.isSpringback || (elasticInfo.offset > 0) == elasticInfo.initDirection ) {
+
+            if ( elasticInfo.offset > 0 && lastXoffset < 0 || elasticInfo.offset < 0 && lastXoffset > 0) {
+
+                var direction = elasticInfo.offset - lastXoffset > 0;
+                if ( !originReset($this, elasticInfo, param.direction, direction) )
+                    return false;
+            } else {
+
+                if (param.direction == 'X') {
+                    $this.move.nowX += elasticInfo.velocity;
+                } else if (param.direction == 'Y') {
+                    $this.move.nowY += elasticInfo.velocity;
+                }
+
+            }
+
+        } else {
+            if ( !originReset($this, elasticInfo, param.direction, elasticInfo.initDirection) )
+                return false;
+        }
+
+        if (param.direction == 'X') {
+            elasticInfo.offset = $this.move.nowX - elasticInfo.balancePosition;
+        } else if (param.direction == 'Y') {
+            elasticInfo.offset = $this.move.nowY - elasticInfo.balancePosition;
+        }
+
+        if ( $this.scaleFn) {
+            $this.scale.value = $this.scaleFn($this.move.nowX, $this.move.nowY);
+        }
+
+        elasticInfo.acceleration = - $this.elastic.k * elasticInfo.offset;
+
+        return true;
+    }
+
+    /**
+     * 过平衡点时校准
+     * @param $this 当前对象
+     * @param elasticInfo 当前弹动方向的对象
+     * @param direction 当前弹动方向 {x:水平，y;垂直}
+     * @param Vdirection 接下来的速度方向
+     * @returns {boolean} 如果不再运动返回 false
+     */
+    function originReset($this, elasticInfo, direction, Vdirection) {
+        elasticInfo.offset = 0;
+
+        if (direction == 'X') {
+            $this.move.nowX = elasticInfo.balancePosition;
+        } else if (direction == 'Y') {
+            $this.move.nowY = elasticInfo.balancePosition;
+        }
+
+        if ( Math.abs( elasticInfo.velocity ) < 0.25 && Math.abs( elasticInfo.acceleration ) < 0.25) {
+
+            elasticInfo.velocity = 0;
+            elasticInfo.acceleration = 0;
+            elasticInfo.isChange = false;
+
+            return false;
+        }
+
+        elasticInfo.allPower *= $this.elastic.friction;
+        elasticInfo.velocity = Vdirection ? Math.sqrt(elasticInfo.allPower) : - Math.sqrt(elasticInfo.allPower);
+
+        return true;
     }
 
     /**
