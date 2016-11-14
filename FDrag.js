@@ -1,10 +1,13 @@
+/*!
+ * FDrag.js 1.2 - drag element animation
+ * demo http://www.funwewhere.com/FDrag.html
+ * MIT licensed
+ *
+ * Copyright (C) 2016 funwewhere, http://www.funwewhere.com
+ */
 (function(){
 
     "use strict";
-
-    // When a list is configured as 'live', this is how frequently
-    // the DOM will be polled for changes
-    var LIVE_INTERVAL = 500;
 
     var IS_TOUCH_DEVICE = !!( 'ontouchstart' in window );
 
@@ -24,26 +27,30 @@
             for( var i = 0, len = lists.length; i < len; i++ ) {
                 if (lists[i].needUpdate()) {
                     active = true;
-                    lists[i].element.style.webkitTransform = 'translate('+ lists[i].move.nowX +'px, ' + lists[i].move.nowY + 'px) scale(' + lists[i].scale.value + ', ' + lists[i].scale.value + ')';
                 }
+                lists[i].element.style.webkitTransform = 'translate('+ lists[i].move.nowX +'px, ' + lists[i].move.nowY + 'px) scale(' + lists[i].scale.value + ', ' + lists[i].scale.value + ')';
             }
         }
     }
 
     function add( element, options ) {
-        // Delete duplicates (but continue and re-bind this list to get the
-        // latest properties and list items)
-        if( contains( element ) ) {
-            remove( element );
+        if ( IS_TOUCH_DEVICE ) {
+            // Delete duplicates (but continue and re-bind this list to get the
+            // latest properties and list items)
+            if( contains( element ) ) {
+                remove( element );
+            }
+
+            var dragObject = new DragObject(element, options);
+
+            dragObject.bind();
+            // Add this element to the collection
+            lists.push(dragObject);
+
+            return dragObject;
+        } else{
+            throw "this isn't a touch device";
         }
-
-        var dragObject = IS_TOUCH_DEVICE ? new DragObject( element, options) : null;
-
-        dragObject.bind();
-        // Add this element to the collection
-        lists.push( dragObject );
-
-        return dragObject;
     }
 
     /**
@@ -191,6 +198,12 @@
     }
 
     DragObject.prototype = {
+        setInfo : function(offsetX, offsetY, scale){
+            this.move.nowX = offsetX != null ? offsetX : this.move.nowX;
+            this.move.nowY = offsetY != null ? offsetY :  this.move.nowY;
+            this.scale.value = scale != null ? scale :  this.scale.value;
+            this.element.style.webkitTransform = 'translate('+ this.move.nowX +'px, ' + this.move.nowY + 'px) scale(' + this.scale.value + ', ' + this.scale.value + ')';
+        },
         bind : function() {
             var scope = this;
 
@@ -296,9 +309,9 @@
             this.elastic.friction = option.friction || this.elastic.friction;
             this.elastic.k = option.k || this.elastic.k;
             this.elastic.callback = option.callback || this.elastic.callback;
-            
+
             if ((this.elastic.direction == 'all' || this.elastic.direction == 'X') && option.X) {
-                
+
                 this.elastic.X.isSpringback = option.X.isSpringback || this.elastic.X.isSpringback;
                 this.elastic.X.balancePosition = option.X.origin || this.elastic.X.balancePosition;
                 this.elastic.X.offset = this.move.nowX - this.elastic.X.balancePosition;
@@ -306,7 +319,7 @@
                 this.elastic.X.acceleration = - this.elastic.k * this.elastic.X.offset;
                 this.elastic.X.initDirection = this.move.nowX - this.elastic.X.balancePosition > 0;
                 this.elastic.X.isChange = true;
-                
+
                 intervalCall({
                     intervalFn : elasticing,
                     param : {
@@ -318,7 +331,7 @@
                 });
             }
             if ((this.elastic.direction == 'all' || this.elastic.direction == 'Y') && option.Y) {
-                
+
                 this.elastic.Y.isSpringback = option.Y.isSpringback || this.elastic.Y.isSpringback;
                 this.elastic.Y.balancePosition = option.Y.origin || this.elastic.Y.balancePosition;
                 this.elastic.Y.offset = this.move.nowY - this.elastic.Y.balancePosition;
@@ -326,7 +339,7 @@
                 this.elastic.Y.acceleration = - this.elastic.k * this.elastic.Y.offset;
                 this.elastic.Y.initDirection = this.move.nowY - this.elastic.Y.balancePosition > 0;
                 this.elastic.Y.isChange = true;
-                
+
                 intervalCall({
                     intervalFn : elasticing,
                     param : {
