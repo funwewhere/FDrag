@@ -146,6 +146,18 @@
             lastY : 0,
         }
 
+        this.touch = {
+            X: 0,
+            Y: 0,
+            offsetX: 0,
+            offsetY: 0,
+            startX: 0,
+            startY: 0,
+            previousX: 0,
+            previousY: 0,
+            isActive: false
+        };
+
         this.scale = {
             isChange : false,
             value : 1,
@@ -157,7 +169,6 @@
 
         this.elastic = {
             direction : 'all',
-            angle : 0,
             friction : 1,
             callback : null,
             k : 0.01,
@@ -182,18 +193,6 @@
                 allPower : 0
             }
         }
-
-        this.touch = {
-            X: 0,
-            Y: 0,
-            offsetX: 0,
-            offsetY: 0,
-            startX: 0,
-            startY: 0,
-            previousX: 0,
-            previousY: 0,
-            isActive: false
-        };
 
     }
 
@@ -376,15 +375,19 @@
         var lastXoffset = elasticInfo.offset;
         elasticInfo.offset += elasticInfo.velocity;
 
+        //到原点时不回弹，或者当前的偏移位置和运动的初始位置在原点的同一个侧
         if ( !elasticInfo.isSpringback || (elasticInfo.offset > 0) == elasticInfo.initDirection ) {
 
+            //判断是否过原点，即判断下一个偏移位置与当前偏移位置不在原点的同一个侧
             if ( elasticInfo.offset > 0 && lastXoffset < 0 || elasticInfo.offset < 0 && lastXoffset > 0) {
 
+                //运动方向
                 var direction = elasticInfo.offset - lastXoffset > 0;
                 if ( !originReset($this, elasticInfo, param.direction, direction) )
                     return false;
             } else {
 
+                //更新新位置
                 if (param.direction == 'X') {
                     $this.move.nowX += elasticInfo.velocity;
                 } else if (param.direction == 'Y') {
@@ -394,6 +397,7 @@
             }
 
         } else {
+            //过原点时回弹
             if ( !originReset($this, elasticInfo, param.direction, elasticInfo.initDirection) )
                 return false;
         }
@@ -414,7 +418,7 @@
     }
 
     /**
-     * 过平衡点时校准
+     * 过原点时校准
      * @param $this 当前对象
      * @param elasticInfo 当前弹动方向的对象
      * @param direction 当前弹动方向 {x:水平，y;垂直}
