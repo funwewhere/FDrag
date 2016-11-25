@@ -25,7 +25,7 @@
             requestAnimFrame( refresh );
             active = false;
             for( var i = 0, len = lists.length; i < len; i++ ) {
-                if (lists[i].needUpdate()) {
+                if (lists[i].isNeedUpdate()) {
                     active = true;
                 }
                 lists[i].element.style.webkitTransform = 'translate('+ lists[i].move.nowX +'px, ' + lists[i].move.nowY + 'px) scale(' + lists[i].scale.value + ', ' + lists[i].scale.value + ')';
@@ -34,7 +34,8 @@
     }
 
     function add( element, options ) {
-        if ( IS_TOUCH_DEVICE ) {
+        //TODO
+        // if ( IS_TOUCH_DEVICE ) {
             // Delete duplicates (but continue and re-bind this list to get the
             // latest properties and list items)
             if( contains( element ) ) {
@@ -48,9 +49,9 @@
             lists.push(dragObject);
 
             return dragObject;
-        } else{
-            throw "this isn't a touch device";
-        }
+        // } else{
+        //     throw "this isn't a touch device";
+        // }
     }
 
     /**
@@ -218,42 +219,49 @@
                 scope.onTouchEnd( event );
             };
 
-            this.element.addEventListener( 'touchstart', this.touchStartDelegate, false );
-            this.element.addEventListener( 'touchmove', this.touchMoveDelegate, false );
-            this.element.addEventListener( 'touchend', this.touchEndDelegate, false );
+            if ( IS_TOUCH_DEVICE ) {
+                this.element.addEventListener('touchstart', this.touchStartDelegate, false);
+                this.element.addEventListener('touchmove', this.touchMoveDelegate, false);
+                this.element.addEventListener('touchend', this.touchEndDelegate, false);
+            } else {
+                this.element.addEventListener('mousedown', this.touchStartDelegate, false);
+                this.element.addEventListener('mousemove', this.touchMoveDelegate, false);
+                this.element.addEventListener('mouseup', this.touchEndDelegate, false);
+            }
         },
         onTouchStart : function( event ) {
             event.preventDefault();
 
-            var touches = event.touches;
+            var movePosition = IS_TOUCH_DEVICE ? event.touches[0] : event;
 
-            if (touches.length == 1) {
-                this.move.lastX = this.move.nowX;
-                this.move.lastY = this.move.nowY;
-                this.touch.X = touches[0].clientX;
-                this.touch.Y = touches[0].clientY;
-                this.touch.startX = this.touch.X;
-                this.touch.startY = this.touch.Y;
-                this.touch.previousX = this.touch.X;
-                this.touch.previousY = this.touch.Y;
-                this.touch.offsetX = 0;
-                this.touch.offsetY = 0;
-                this.touch.isActive = true;
-                if ( !active ) {
-                    active = true;
-                    refresh();
-                }
+            this.move.lastX = this.move.nowX;
+            this.move.lastY = this.move.nowY;
+            this.touch.X = movePosition.clientX;
+            this.touch.Y = movePosition.clientY;
+            this.touch.startX = this.touch.X;
+            this.touch.startY = this.touch.Y;
+            this.touch.previousX = this.touch.X;
+            this.touch.previousY = this.touch.Y;
+            this.touch.offsetX = 0;
+            this.touch.offsetY = 0;
+            this.touch.isActive = true;
+
+            if ( !active ) {
+                active = true;
+                refresh();
             }
         },
         onTouchMove : function( event ) {
+            console.log('33');
+            if ( !this.touch.isActive ) return;
             event.preventDefault();
 
-            var touches = event.touches;
+            var movePositon = IS_TOUCH_DEVICE ? event.touches[0] : event;
 
             this.touch.previousX = this.touch.X;
             this.touch.previousY = this.touch.Y;
-            this.touch.X = touches[0].clientX;
-            this.touch.Y = touches[0].clientY;
+            this.touch.X = movePositon.clientX;
+            this.touch.Y = movePositon.clientY;
             this.touch.offsetX = this.touch.X - this.touch.startX;
             this.touch.offsetY = this.touch.Y - this.touch.startY;
 
@@ -262,6 +270,7 @@
             if ( this.scaleFn) {
                 this.scale.value = this.scaleFn(this.move.nowX, this.move.nowY);
             }
+
         },
         onTouchEnd : function( event ) {
             this.touch.offsetX = 0;
@@ -354,7 +363,7 @@
             this.move.nowX = this.direction != 'Y' ? velidateBound(this.move.lastX + this.touch.offsetX, this.minX, this.maxX) : 0;
             this.move.nowY = this.direction != 'X' ? velidateBound(this.move.lastY + this.touch.offsetY, this.minY, this.maxY) : 0;
         },
-        needUpdate : function() {
+        isNeedUpdate : function() {
             return this.touch.isActive || this.scale.isChange || this.elastic.X.isChange || this.elastic.Y.isChange;
         },
         destroy : function() {
@@ -462,21 +471,22 @@
 
     /**
      * 循环调用函数，提供传参，及回调函数
-     * @param optin.intervalFn 需要循环的函数，函数中return true 为继续执行循环，return false 为继续执行循环并执行回调函数
-     * @param optin.param 传入optin.intervalFn的参数，optin.intervalFn 需要自己实现参数入口，可以为空
-     * @param optin.interval 循环执行的间隔时间， 默认为 1000/60 ms
-     * @param optin.callback 回调函数
+     * @param option.intervalFn 需要循环的函数，函数中return true 为继续执行循环，return false 停止循环并执行回调函数
+     * @param option.param 传入optin.intervalFn的参数，optin.intervalFn 需要自己实现参数入口，可以为空
+     * @param option.interval 循环执行的间隔时间， 默认为 1000/60 ms
+     * @param option.callback 回调函数
      */
-    function intervalCall( optin ) {
-        var interval = optin.interval || 1000 / 60;
+    function intervalCall( option ) {
+        var interval = option.interval && (+option.interval >　0) ? +option.interval : 1000 / 60;
+
         setTimeout(loop, interval);
 
         function loop() {
-            if ( optin.intervalFn(optin.param) ) {
+            if ( option.intervalFn(option.param) ) {
                 setTimeout(loop, interval);
             } else {
-                if(typeof optin.callback == 'function'){
-                    optin.callback();
+                if(typeof option.callback == 'function'){
+                    option.callback();
                 }
             }
         }
