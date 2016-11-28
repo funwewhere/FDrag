@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style type="text/css">
+        .main{
+            left: 50%;
+            top: 10%;
+            height: 100px;
+            position: absolute;
+            width: 100px;
+            background-color: #0aa9dc;
+        }
+        .main1{
+            left: 50%;
+            top: 20%;
+            height: 100px;
+            position: absolute;
+            width: 100px;
+            background-color: #0ba424;
+        }
+        .main2{
+            left: 50%;
+            top: 30%;
+            height: 100px;
+            position: absolute;
+            width: 100px;
+            background-color: #ff9c00;
+        }
+        .main3{
+            left: 50%;
+            top: 40%;
+            height: 100px;
+            position: absolute;
+            width: 100px;
+            background-color: #dd1111;
+        }
+        .main4{
+            left: 50%;
+            top: 60%;
+            height: 100px;
+            position: absolute;
+            width: 100px;
+            background-color: #007aff;
+        }
+    </style>
+</head>
+<body>
+<div class="main">
+</div>
+<div class="main1">
+</div>
+<div class="main2">
+</div>
+<div class="main3">
+</div>
+<div class="main4">
+</div>
+</body>
+
+<script type="application/javascript" src="FDrag.js"></script>
+<script>
+    var MyDrag = FDrag.init('.main',{
+        direction:'X',
+        scaleFn:function(x, y) {
+            return (window.innerWidth+2*x)/window.innerWidth;
+        },
+        touchEndFn : function () {
+//            MyDrag.scaleChange({
+//                min : 0.03,
+//                rate : 0.78,
+//                callback : function() {
+//                    MyDrag.scaleChange({
+//                        max : (window.innerWidth+2*MyDrag.move.nowX)/window.innerWidth,
+//                        rate : 1.22,
+//                    });
+//                }
+//            });
+            MyDrag.elasticChange({
+                friction : 1,
+                X : {
+                    origin : 0,
+                    isSpringback : false
+                }
+            });
+        }
+    });
+    var MyDrag1 = FDrag.init('.main1',{
+        direction:'X',
+        scaleFn:function(x, y) {
+            return (window.innerWidth+2*Math.abs(x))/window.innerWidth;
+        },
+        touchEndFn : function () {
+            MyDrag1.elasticChange({
+                k : 0.03,
+                friction : 1,
+                X : {
+                    origin : 0,
+                    isSpringback : false
+                }
+            });
+        }
+    });
+    var MyDrag2 = FDrag.init('.main2',{
+        direction:'X',
+        scaleFn:function(x, y) {
+            return ((window.innerWidth+2*Math.abs(x)) / window.innerWidth);
+        },
+        touchEndFn : function () {
+            MyDrag2.elasticChange({
+                friction : 1,
+                X : {
+                    origin : 0,
+                    isSpringback : true
+                }
+            });
+        }
+    });
+    var MyDrag3 = FDrag.init('.main3',{
+        direction:'X',
+        scaleFn:function(x, y) {
+            return (window.innerWidth+2*Math.abs(x))/window.innerWidth;
+        },
+        touchEndFn : function () {
+            MyDrag3.elasticChange({
+                k : 0.03,
+                friction : 0.5,
+                X : {
+                    origin : 0,
+                    isSpringback : false
+                }
+            });
+        }
+    });
+
+    var MyDrag4 = FDrag.init('.main4',{
+        direction:'all',
+        scaleFn:function(x, y) {
+            return (window.innerWidth+2*Math.abs(x))/window.innerWidth;
+        },
+        touchEndFn : function () {
+            MyDrag4.elasticChange({
+                k : 0.01,
+                friction : 1,
+                X : {
+                    origin : 0,
+                    isSpringback : false
+                },
+                Y : {
+                    origin : 0,
+                    isSpringback : true
+                }
+            });
+        }
+    });
+</script>
+</html>
