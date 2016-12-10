@@ -132,7 +132,7 @@
 
     function DragObject( element, option) {
         this.element = element;
-        this.direction = option && option.direction || 'all';
+        this.orientation = option && option.orientation || 'all';
         this.maxX = option && option.maxX || null;
         this.minX = option && option.minX || null;
         this.maxY = option && option.maxY || null;
@@ -169,24 +169,24 @@
         }
 
         this.elastic = {
-            direction : 'all',
+            orientation : 'all',
             friction : 1,
             callback : null,
             k : 0.01,
-            X : {
+            horizontal : {
                 isChange : false,
                 velocity : 0,
-                initDirection : 0,
+                initorientation : 0,
                 balancePosition :0,
                 isSpringback : false,
                 acceleration : 0,
                 offset : 0,
                 allPower : 0
             },
-            Y : {
+            vertical : {
                 isChange : false,
                 velocity : 0,
-                initDirection : 0,
+                initorientation : 0,
                 balancePosition :0,
                 isSpringback : false,
                 acceleration : 0,
@@ -283,13 +283,13 @@
                 this.touchEndFn(this.move);
             }
         },
-        scaleChange : function(option) {
+        scaleAnimate : function(option) {
             this.scale.isChange = true;
 
             this.scale.max = option.max || this.scale.max;
             this.scale.min = option.min || this.scale.min;
             this.scale.rate = option.rate || this.scale.rate;
-            this.scale.callback =  option.callback || null;
+            this.scale.callback =  typeof option.callback == 'function' ? option.callback : null;
 
             if ( !active ) {
                 active = true;
@@ -311,60 +311,60 @@
                 callback : this.scale.callback
             });
         },
-        elasticChange : function(option){
+        elasticAnimate : function(option){
 
-            this.elastic.direction = option.direction || this.elastic.direction;
+            this.elastic.orientation = option.orientation || this.elastic.orientation;
             this.elastic.friction = option.friction || this.elastic.friction;
             this.elastic.k = option.k || this.elastic.k;
             this.elastic.callback = option.callback || this.elastic.callback;
 
-            if ((this.elastic.direction == 'all' || this.elastic.direction == 'X') && option.X) {
+            if ((this.elastic.orientation == 'all' || this.elastic.orientation == 'horizontal') && option.horizontal) {
 
-                this.elastic.X.isSpringback = option.X.isSpringback || this.elastic.X.isSpringback;
-                this.elastic.X.balancePosition = option.X.origin || this.elastic.X.balancePosition;
-                this.elastic.X.offset = this.move.nowX - this.elastic.X.balancePosition;
-                this.elastic.X.allPower = this.elastic.k * Math.pow(this.elastic.X.offset, 2);
-                this.elastic.X.acceleration = - this.elastic.k * this.elastic.X.offset;
-                this.elastic.X.initDirection = this.move.nowX - this.elastic.X.balancePosition > 0;
-                this.elastic.X.isChange = true;
+                this.elastic.horizontal.isSpringback = option.horizontal.isSpringback || this.elastic.horizontal.isSpringback;
+                this.elastic.horizontal.balancePosition = option.horizontal.origin || this.elastic.horizontal.balancePosition;
+                this.elastic.horizontal.offset = this.move.nowX - this.elastic.horizontal.balancePosition;
+                this.elastic.horizontal.allPower = this.elastic.k * Math.pow(this.elastic.horizontal.offset, 2);
+                this.elastic.horizontal.acceleration = - this.elastic.k * this.elastic.horizontal.offset;
+                this.elastic.horizontal.initorientation = this.move.nowX - this.elastic.horizontal.balancePosition > 0;
+                this.elastic.horizontal.isChange = true;
 
                 intervalCall({
                     intervalFn : elasticing,
                     param : {
                         $this : this,
-                        elasticInfo : this.elastic.X,
-                        direction : 'X'
+                        elasticInfo : this.elastic.horizontal,
+                        orientation : 'horizontal'
                     },
                     callback : this.elastic.callback
                 });
             }
-            if ((this.elastic.direction == 'all' || this.elastic.direction == 'Y') && option.Y) {
+            if ((this.elastic.orientation == 'all' || this.elastic.orientation == 'vertical') && option.vertical) {
 
-                this.elastic.Y.isSpringback = option.Y.isSpringback || this.elastic.Y.isSpringback;
-                this.elastic.Y.balancePosition = option.Y.origin || this.elastic.Y.balancePosition;
-                this.elastic.Y.offset = this.move.nowY - this.elastic.Y.balancePosition;
-                this.elastic.Y.allPower = this.elastic.k * Math.pow(this.elastic.Y.offset, 2);
-                this.elastic.Y.acceleration = - this.elastic.k * this.elastic.Y.offset;
-                this.elastic.Y.initDirection = this.move.nowY - this.elastic.Y.balancePosition > 0;
-                this.elastic.Y.isChange = true;
+                this.elastic.vertical.isSpringback = option.vertical.isSpringback || this.elastic.vertical.isSpringback;
+                this.elastic.vertical.balancePosition = option.vertical.origin || this.elastic.vertical.balancePosition;
+                this.elastic.vertical.offset = this.move.nowY - this.elastic.vertical.balancePosition;
+                this.elastic.vertical.allPower = this.elastic.k * Math.pow(this.elastic.vertical.offset, 2);
+                this.elastic.vertical.acceleration = - this.elastic.k * this.elastic.vertical.offset;
+                this.elastic.vertical.initorientation = this.move.nowY - this.elastic.vertical.balancePosition > 0;
+                this.elastic.vertical.isChange = true;
 
                 intervalCall({
                     intervalFn : elasticing,
                     param : {
                         $this : this,
-                        elasticInfo : this.elastic.Y,
-                        direction : 'Y'
+                        elasticInfo : this.elastic.vertical,
+                        orientation : 'vertical'
                     },
                     callback : this.elastic.callback
                 });
             }
         },
         calculateLacation : function() {
-            this.move.nowX = this.direction != 'Y' ? velidateBound(this.move.lastX + this.touch.offsetX, this.minX, this.maxX) : 0;
-            this.move.nowY = this.direction != 'X' ? velidateBound(this.move.lastY + this.touch.offsetY, this.minY, this.maxY) : 0;
+            this.move.nowX = this.orientation != 'vertical' ? velidateBound(this.move.lastX + this.touch.offsetX, this.minX, this.maxX) : 0;
+            this.move.nowY = this.orientation != 'horizontal' ? velidateBound(this.move.lastY + this.touch.offsetY, this.minY, this.maxY) : 0;
         },
         isNeedUpdate : function() {
-            return this.touch.isActive || this.scale.isChange || this.elastic.X.isChange || this.elastic.Y.isChange;
+            return this.touch.isActive || this.scale.isChange || this.elastic.horizontal.isChange || this.elastic.vertical.isChange;
         },
         destroy : function() {
             this.element.removeEventListener( 'touchstart', this.touchStartDelegate, false );
@@ -385,21 +385,21 @@
         elasticInfo.offset += elasticInfo.velocity;
 
         //到原点时不回弹，或者当前的偏移位置和运动的初始位置在原点的同一个侧
-        if ( !elasticInfo.isSpringback || (elasticInfo.offset > 0) == elasticInfo.initDirection ) {
+        if ( !elasticInfo.isSpringback || (elasticInfo.offset > 0) == elasticInfo.initorientation ) {
 
             //判断是否过原点，即判断下一个偏移位置与当前偏移位置不在原点的同一个侧
             if ( elasticInfo.offset > 0 && lastXoffset < 0 || elasticInfo.offset < 0 && lastXoffset > 0) {
 
                 //运动方向
-                var direction = elasticInfo.offset - lastXoffset > 0;
-                if ( !originReset($this, elasticInfo, param.direction, direction) )
+                var orientation = elasticInfo.offset - lastXoffset > 0;
+                if ( !originReset($this, elasticInfo, param.orientation, orientation) )
                     return false;
             } else {
 
                 //更新新位置
-                if (param.direction == 'X') {
+                if (param.orientation == 'horizontal') {
                     $this.move.nowX += elasticInfo.velocity;
-                } else if (param.direction == 'Y') {
+                } else if (param.orientation == 'vertical') {
                     $this.move.nowY += elasticInfo.velocity;
                 }
 
@@ -407,13 +407,13 @@
 
         } else {
             //过原点时回弹
-            if ( !originReset($this, elasticInfo, param.direction, elasticInfo.initDirection) )
+            if ( !originReset($this, elasticInfo, param.orientation, elasticInfo.initorientation) )
                 return false;
         }
 
-        if (param.direction == 'X') {
+        if (param.orientation == 'horizontal') {
             elasticInfo.offset = $this.move.nowX - elasticInfo.balancePosition;
-        } else if (param.direction == 'Y') {
+        } else if (param.orientation == 'vertical') {
             elasticInfo.offset = $this.move.nowY - elasticInfo.balancePosition;
         }
 
@@ -430,16 +430,16 @@
      * 过原点时校准
      * @param $this 当前对象
      * @param elasticInfo 当前弹动方向的对象
-     * @param direction 当前弹动方向 {x:水平，y;垂直}
-     * @param Vdirection 接下来的速度方向
+     * @param orientation 当前弹动方向 {x:水平，y;垂直}
+     * @param Vorientation 接下来的速度方向
      * @returns {boolean} 如果不再运动返回 false
      */
-    function originReset($this, elasticInfo, direction, Vdirection) {
+    function originReset($this, elasticInfo, orientation, Vorientation) {
         elasticInfo.offset = 0;
 
-        if (direction == 'X') {
+        if (orientation == 'horizontal') {
             $this.move.nowX = elasticInfo.balancePosition;
-        } else if (direction == 'Y') {
+        } else if (orientation == 'vertical') {
             $this.move.nowY = elasticInfo.balancePosition;
         }
 
@@ -453,7 +453,7 @@
         }
 
         elasticInfo.allPower *= $this.elastic.friction;
-        elasticInfo.velocity = Vdirection ? Math.sqrt(elasticInfo.allPower) : - Math.sqrt(elasticInfo.allPower);
+        elasticInfo.velocity = Vorientation ? Math.sqrt(elasticInfo.allPower) : - Math.sqrt(elasticInfo.allPower);
 
         return true;
     }

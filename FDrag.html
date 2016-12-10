@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Document</title>
+    <title>FDrag</title>
     <style type="text/css">
         .main{
             left: 50%;
@@ -62,24 +62,24 @@
 <script type="application/javascript" src="FDrag.js"></script>
 <script>
     var MyDrag = FDrag.init('.main',{
-        direction:'X',
+        orientation:'horizontal',
         scaleFn:function(x, y) {
             return (window.innerWidth+2*x)/window.innerWidth;
         },
         touchEndFn : function () {
-//            MyDrag.scaleChange({
+//            MyDrag.scaleAnimate({
 //                min : 0.03,
 //                rate : 0.78,
 //                callback : function() {
-//                    MyDrag.scaleChange({
+//                    MyDrag.scaleAnimate({
 //                        max : (window.innerWidth+2*MyDrag.move.nowX)/window.innerWidth,
 //                        rate : 1.22,
 //                    });
 //                }
 //            });
-            MyDrag.elasticChange({
+            MyDrag.elasticAnimate({
                 friction : 1,
-                X : {
+                horizontal : {
                     origin : 0,
                     isSpringback : false
                 }
@@ -87,15 +87,15 @@
         }
     });
     var MyDrag1 = FDrag.init('.main1',{
-        direction:'X',
+        orientation:'horizontal',
         scaleFn:function(x, y) {
             return (window.innerWidth+2*Math.abs(x))/window.innerWidth;
         },
         touchEndFn : function () {
-            MyDrag1.elasticChange({
+            MyDrag1.elasticAnimate({
                 k : 0.03,
                 friction : 1,
-                X : {
+                horizontal : {
                     origin : 0,
                     isSpringback : false
                 }
@@ -103,14 +103,14 @@
         }
     });
     var MyDrag2 = FDrag.init('.main2',{
-        direction:'X',
+        orientation:'horizontal',
         scaleFn:function(x, y) {
             return ((window.innerWidth+2*Math.abs(x)) / window.innerWidth);
         },
         touchEndFn : function () {
-            MyDrag2.elasticChange({
+            MyDrag2.elasticAnimate({
                 friction : 1,
-                X : {
+                horizontal : {
                     origin : 0,
                     isSpringback : true
                 }
@@ -118,15 +118,15 @@
         }
     });
     var MyDrag3 = FDrag.init('.main3',{
-        direction:'X',
+        orientation:'horizontal',
         scaleFn:function(x, y) {
             return (window.innerWidth+2*Math.abs(x))/window.innerWidth;
         },
         touchEndFn : function () {
-            MyDrag3.elasticChange({
+            MyDrag3.elasticAnimate({
                 k : 0.03,
                 friction : 0.5,
-                X : {
+                horizontal : {
                     origin : 0,
                     isSpringback : false
                 }
@@ -135,19 +135,19 @@
     });
 
     var MyDrag4 = FDrag.init('.main4',{
-        direction:'all',
-        scaleFn:function(x, y) {
+        orientation:'all',
+        scaleChange:function(x, y) {
             return (window.innerWidth+2*Math.abs(x))/window.innerWidth;
         },
         touchEndFn : function () {
-            MyDrag4.elasticChange({
+            MyDrag4.elasticAnimate({
                 k : 0.01,
                 friction : 1,
-                X : {
+                horizontal : {
                     origin : 0,
                     isSpringback : false
                 },
-                Y : {
+                vertical : {
                     origin : 0,
                     isSpringback : true
                 }
