@@ -198,7 +198,7 @@
     }
 
     DragObject.prototype = {
-        setInfo : function(offsetX, offsetY, scale){
+        setState : function(offsetX, offsetY, scale){
             this.move.nowX = offsetX != null ? offsetX : this.move.nowX;
             this.move.nowY = offsetY != null ? offsetY :  this.move.nowY;
             this.scale.value = scale != null ? scale :  this.scale.value;
@@ -252,7 +252,6 @@
             }
         },
         onTouchMove : function( event ) {
-            console.log('33');
             if ( !this.touch.isActive ) return;
             event.preventDefault();
 
@@ -286,9 +285,9 @@
         scaleAnimate : function(option) {
             this.scale.isChange = true;
 
-            this.scale.max = option.max || this.scale.max;
-            this.scale.min = option.min || this.scale.min;
-            this.scale.rate = option.rate || this.scale.rate;
+            this.scale.max = option.max || 1;
+            this.scale.min = option.min || 0.03;
+            this.scale.rate = option.rate || 0.78;
             this.scale.callback =  typeof option.callback == 'function' ? option.callback : null;
 
             if ( !active ) {
@@ -313,15 +312,15 @@
         },
         elasticAnimate : function(option){
 
-            this.elastic.orientation = option.orientation || this.elastic.orientation;
-            this.elastic.friction = option.friction || this.elastic.friction;
-            this.elastic.k = option.k || this.elastic.k;
-            this.elastic.callback = option.callback || this.elastic.callback;
+            this.elastic.orientation = option.orientation || "all";
+            this.elastic.friction = option.friction || 1;
+            this.elastic.k = option.k || 0.01;
+            this.elastic.callback = option.callback;
 
             if ((this.elastic.orientation == 'all' || this.elastic.orientation == 'horizontal') && option.horizontal) {
 
-                this.elastic.horizontal.isSpringback = option.horizontal.isSpringback || this.elastic.horizontal.isSpringback;
-                this.elastic.horizontal.balancePosition = option.horizontal.origin || this.elastic.horizontal.balancePosition;
+                this.elastic.horizontal.isSpringback = option.horizontal.isSpringback || false;
+                this.elastic.horizontal.balancePosition = option.horizontal.origin || 0;
                 this.elastic.horizontal.offset = this.move.nowX - this.elastic.horizontal.balancePosition;
                 this.elastic.horizontal.allPower = this.elastic.k * Math.pow(this.elastic.horizontal.offset, 2);
                 this.elastic.horizontal.acceleration = - this.elastic.k * this.elastic.horizontal.offset;
@@ -340,8 +339,8 @@
             }
             if ((this.elastic.orientation == 'all' || this.elastic.orientation == 'vertical') && option.vertical) {
 
-                this.elastic.vertical.isSpringback = option.vertical.isSpringback || this.elastic.vertical.isSpringback;
-                this.elastic.vertical.balancePosition = option.vertical.origin || this.elastic.vertical.balancePosition;
+                this.elastic.vertical.isSpringback = option.vertical.isSpringback || false;
+                this.elastic.vertical.balancePosition = option.vertical.origin || 0;
                 this.elastic.vertical.offset = this.move.nowY - this.elastic.vertical.balancePosition;
                 this.elastic.vertical.allPower = this.elastic.k * Math.pow(this.elastic.vertical.offset, 2);
                 this.elastic.vertical.acceleration = - this.elastic.k * this.elastic.vertical.offset;
