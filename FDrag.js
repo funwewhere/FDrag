@@ -478,11 +478,11 @@
     function intervalCall( option ) {
         var interval = option.interval && (+option.interval >　0) ? +option.interval : 1000 / 60;
 
-        setTimeout(loop, interval);
+        window.setTimeout(loop, interval);
 
         function loop() {
             if ( option.intervalFn(option.param) ) {
-                setTimeout(loop, interval);
+                window.setTimeout(loop, interval);
             } else {
                 if(typeof option.callback == 'function'){
                     option.callback();
