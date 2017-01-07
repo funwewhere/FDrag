@@ -66,7 +66,7 @@
         scaleFn:function(x, y) {
             return (window.innerWidth+2*x)/window.innerWidth;
         },
-        touchEndFn : function () {
+        callbackTouchEnd : function () {
 //            MyDrag.scaleAnimate({
 //                min : 0.03,
 //                rate : 0.78,
@@ -91,7 +91,7 @@
         scaleFn:function(x, y) {
             return (window.innerWidth+2*Math.abs(x))/window.innerWidth;
         },
-        touchEndFn : function () {
+        callbackTouchEnd : function () {
             MyDrag1.elasticAnimate({
                 k : 0.03,
                 friction : 1,
@@ -107,7 +107,7 @@
         scaleFn:function(x, y) {
             return ((window.innerWidth+2*Math.abs(x)) / window.innerWidth);
         },
-        touchEndFn : function () {
+        callbackTouchEnd : function () {
             MyDrag2.elasticAnimate({
                 friction : 1,
                 horizontal : {
@@ -122,7 +122,7 @@
         scaleFn:function(x, y) {
             return (window.innerWidth+2*Math.abs(x))/window.innerWidth;
         },
-        touchEndFn : function () {
+        callbackTouchEnd : function () {
             MyDrag3.elasticAnimate({
                 k : 0.03,
                 friction : 0.5,
@@ -139,7 +139,7 @@
         scaleChange:function(x, y) {
             return (window.innerWidth+2*Math.abs(x))/window.innerWidth;
         },
-        touchEndFn : function () {
+        callbackTouchEnd : function () {
             MyDrag4.elasticAnimate({
                 k : 0.01,
                 friction : 1,

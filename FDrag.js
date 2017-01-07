@@ -138,7 +138,7 @@
         this.maxY = option && option.maxY || null;
         this.minY = option && option.minY || null;
         this.scaleFn = option && option.scaleFn;
-        this.touchEndFn = option && option.touchEndFn;
+        this.callbackTouchEnd = option && option.callbackTouchEnd;
 
         this.move = {
             nowX : 0,
@@ -278,8 +278,8 @@
             this.move.lastY = this.move.nowY;
 
             this.touch.isActive = false;
-            if ( this.touchEndFn) {
-                this.touchEndFn(this.move);
+            if ( this.callbackTouchEnd) {
+                this.callbackTouchEnd(this.move);
             }
         },
         scaleAnimate : function(option) {
