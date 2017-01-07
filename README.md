@@ -19,7 +19,7 @@
 #### #FDrag.init(el, options)  ：初始化拖动对象
 - el : {string | HTMLElement}  目标元素的CSS 选择器，或 HTMLElement、jQuery 实例
 - options
- -  orientation : {String, Optional} 目标元素的可拖动方向 X : 水平,Y : 垂直，all : 全方向。default : all
+ -  orientation : {String, Optional} 目标元素的可拖动方向 'horizontal' : 水平,'vertical' : 垂直，'all' : 全方向。default : all
  -  maxX : {Number, Optional} 水平最大拖动位移, default: 无限制
  -  minX : {Number, Optional} 水平最小拖动位移, default: 无限制
  -  maxY : {Number, Optional} 垂直最大拖动位移, default: 无限制
